@@ -1,0 +1,6 @@
+black==22.6.0
+flake8==5.0.4
+mypy==0.971
+pytest>=7.2.0
+sphinx-autodoc-typehints[type-comment]>=1.19.3
+sphinx-rtd-theme
