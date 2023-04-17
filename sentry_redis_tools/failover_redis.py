@@ -1,11 +1,16 @@
 import random
 import time
+from typing import Any
 
 from redis.client import StrictRedis
-from redis.exceptions import BusyLoadingError, ConnectionError, ReadOnlyError, TimeoutError
+from redis.exceptions import (
+    ConnectionError,
+    ReadOnlyError,
+    TimeoutError,
+)
 
 
-class FailoverRedis(StrictRedis):
+class FailoverRedis(StrictRedis):  # type: ignore
     """
     Single host redis client implementation with retry logic intended to
     survive failover events. Retry logic uses capped exponential backoff with
@@ -49,15 +54,17 @@ class FailoverRedis(StrictRedis):
 
     def __init__(
         self,
-        *args,
+        *args: Any,
         _retries: int = 10,
         _backoff_min: float = 0.2,
-        _backoff_max: int = 5,
+        _backoff_max: float = 5,
         _backoff_multiplier: float = 2,
-        **kwargs,
+        **kwargs: Any,
     ):
         if _retries < 0:
-            raise ValueError(f"Number of retries must non negative integer: _retries={_retries}")
+            raise ValueError(
+                f"Number of retries must non negative integer: _retries={_retries}"
+            )
         self._retries = _retries
 
         if _backoff_min < 0.0:
@@ -79,7 +86,7 @@ class FailoverRedis(StrictRedis):
         self._backoff_multiplier = _backoff_multiplier
         super().__init__(*args, **kwargs)
 
-    def execute_command(self, *args, **kwargs):
+    def execute_command(self, *args: Any, **kwargs: Any) -> Any:
         retries = 0
         while True:
             try:

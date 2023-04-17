@@ -1,0 +1,33 @@
+name: ci
+on:
+  push:
+    branches:
+      - main
+      - release/**
+  pull_request:
+
+jobs:
+  lint:
+    name: "Linting"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - run: make develop lint format
+      - run: git diff --quiet || (echo '::error ::lint produced file changes, run linter locally and try again' && exit 1)
+  test:
+    name: "Tests"
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - run: make develop test

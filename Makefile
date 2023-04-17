@@ -3,11 +3,19 @@ develop:
 	pip install -r ./requirements-dev.txt
 .PHONY: develop
 
-lint: develop
-	black sentry_redis_tools/
-	mypy sentry_redis_tools/ --strict --config-file mypy.ini
-	flake8 sentry_redis_tools/
+format:
+	black sentry_redis_tools/ tests/
+.PHONY: format
+
+lint:
+	mypy sentry_redis_tools/ tests/ --strict --config-file mypy.ini
+	flake8 sentry_redis_tools/ tests/
 .PHONY: lint
 
-docs: develop
+docs:
 	sphinx-build -W -b html docs/ docs/_build
+.PHONY: docs
+
+test:
+	pytest -vv tests/
+.PHONY: test
