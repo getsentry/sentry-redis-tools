@@ -11,7 +11,7 @@ setup(
     url="https://github.com/getsentry/sentry-redis-tools",
     description="Common utilities related to how Sentry uses Redis",
     zip_safe=False,
-    install_requires=['redis', 'redis-py-cluster'],
+    install_requires=['redis>=4.0'],
     packages=find_packages(exclude=("tests", "tests.*")),
     package_data={"sentry_redis_tools": ["py.typed"]},
     include_package_data=True,
