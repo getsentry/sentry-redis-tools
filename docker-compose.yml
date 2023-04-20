@@ -9,3 +9,8 @@ services:
     environment:
       IP: '0.0.0.0'
       INITIAL_PORT: 16379
+
+  single-redis:
+    image: redis
+    ports:
+      - '6379:6379'
