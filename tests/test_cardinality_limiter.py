@@ -3,14 +3,13 @@ from typing import Collection, Optional, Sequence
 import pytest
 
 from sentry_redis_tools.cardinality_limiter import (
+    CardinalityLimiter,
     GrantedQuota,
     Quota,
-    RedisBlasterBackend,
     RedisCardinalityLimiter,
-    RedisClusterBackend,
     RequestedQuota,
-    RedisCluster,
 )
+from sentry_redis_tools.cardinality_limiter import RedisCluster  # type: ignore
 import redis
 import rb
 
@@ -19,7 +18,7 @@ import rb
     "rb", 'single',
     'cluster'
 ])
-def limiter(request):
+def limiter(request: pytest.FixtureRequest) -> CardinalityLimiter:
 
     if request.param == "rb":
         redis.StrictRedis().flushdb()
@@ -34,6 +33,8 @@ def limiter(request):
         ])
         client.flushdb()
         return RedisCardinalityLimiter(client)
+
+    raise RuntimeError(f"invalid request.param {request.param}")
 
 
 class LimiterHelper:
@@ -53,6 +54,8 @@ class LimiterHelper:
             (value,) = values
             return value
 
+        return None
+
     def add_values(self, values: Sequence[int]) -> Collection[int]:
         request = RequestedQuota(prefix="hello", unit_hashes=values, quota=self.quota)
         new_timestamp, grants = self.limiter.check_within_quotas(
@@ -63,7 +66,7 @@ class LimiterHelper:
         return grant.granted_unit_hashes
 
 
-def test_basic(limiter: RedisCardinalityLimiter):
+def test_basic(limiter: RedisCardinalityLimiter) -> None:
     helper = LimiterHelper(limiter)
 
     for _ in range(20):
@@ -72,7 +75,7 @@ def test_basic(limiter: RedisCardinalityLimiter):
     for _ in range(20):
         assert helper.add_value(2) == 2
 
-    assert [helper.add_value(10 + i) for i in range(100)] == list(range(10, 18)) + [None] * 92
+    assert [helper.add_value(10 + i) for i in range(100)] == list(range(10, 18)) + [None] * 92  # type: ignore
 
     helper.timestamp += 3600
 
@@ -82,10 +85,10 @@ def test_basic(limiter: RedisCardinalityLimiter):
     # `cardinality:timeseries` keys for 1, 2 still exist in this test setup
     # (and we would admit them on top of 10..20), but they won't in a
     # real-world scenario
-    assert [helper.add_value(10 + i) for i in range(100)] == list(range(10, 20)) + [None] * 90
+    assert [helper.add_value(10 + i) for i in range(100)] == list(range(10, 20)) + [None] * 90  # type: ignore
 
 
-def test_multiple_prefixes(limiter: RedisCardinalityLimiter):
+def test_multiple_prefixes(limiter: RedisCardinalityLimiter) -> None:
     """
     Test multiple prefixes/organizations and just make sure we're not leaking
     state between prefixes.
@@ -147,7 +150,7 @@ def test_multiple_prefixes(limiter: RedisCardinalityLimiter):
     limiter.use_quotas(grants, new_timestamp)
 
 
-def test_sliding(limiter: RedisCardinalityLimiter):
+def test_sliding(limiter: RedisCardinalityLimiter) -> None:
     """
     Our rate limiter has a sliding window of [now - 1 hour ; now], with a
     granularity of 1 hour.
@@ -195,7 +198,7 @@ def test_sliding(limiter: RedisCardinalityLimiter):
     assert admissions == expected
 
 
-def test_sampling(limiter: RedisCardinalityLimiter):
+def test_sampling(limiter: RedisCardinalityLimiter) -> None:
     """
     demonstrate behavior when "shard sampling" is active. If one out of 10
     shards for an organization are stored, it is still possible to limit the
@@ -217,7 +220,7 @@ def test_sampling(limiter: RedisCardinalityLimiter):
     assert admissions == [None] * 10
 
 
-def test_sampling_going_bad(limiter: RedisCardinalityLimiter):
+def test_sampling_going_bad(limiter: RedisCardinalityLimiter) -> None:
     """
     test an edgecase of set sampling in the cardinality limiter. it is not
     exactly desired behavior but a known sampling artifact
@@ -229,10 +232,10 @@ def test_sampling_going_bad(limiter: RedisCardinalityLimiter):
     # when adding "hashes" 0..10 in ascending order, the first hash will fill
     # up the physical shard, and a total count of 10 is extrapolated from that
     admissions = [helper.add_value(i) for i in range(10)]
-    assert admissions == [0] + [None] * 9
+    assert admissions == [0] + [None] * 9  # type: ignore
 
 
-def test_regression_mixed_order(limiter: RedisCardinalityLimiter):
+def test_regression_mixed_order(limiter: RedisCardinalityLimiter) -> None:
     """
     Regression test to assert we still accept hashes after dropping some
     within the same request, regardless of set order.
