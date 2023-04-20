@@ -5,7 +5,9 @@ develop:
 
 redis-cluster:
 	docker-compose up -d
-	sleep 10
+	# wait for redis cluster to come up
+	for i in 1 2 3 4 5; do redis-cli -c -p 16379 hello && break; sleep $$i; done
+	
 .PHONY: redis-cluster
 
 format:
