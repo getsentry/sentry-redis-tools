@@ -1,8 +1,11 @@
 develop:
 	pip install -e .
 	pip install -r ./requirements-dev.txt
-	docker-compose up -d
 .PHONY: develop
+
+redis-cluster:
+	docker-compose up -d
+.PHONY: redis-cluster
 
 format:
 	black sentry_redis_tools/ tests/

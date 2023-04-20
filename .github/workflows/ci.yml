@@ -17,7 +17,9 @@ jobs:
         with:
           python-version: 3.8
 
-      - run: make develop lint format
+      - run: make develop
+      - run: make lint
+      - run: make format
       - run: git diff --quiet || (echo '::error ::lint produced file changes, run linter locally and try again' && exit 1)
   test:
     name: "Tests"
@@ -35,5 +37,6 @@ jobs:
           python-version: 3.8
 
       - run: make develop
+      - run: make redis-cluster
       - run: pip install redis==${{ matrix.redis-py }}
       - run: make test
