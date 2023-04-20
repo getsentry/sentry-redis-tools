@@ -28,7 +28,9 @@ def limiter(request: pytest.FixtureRequest) -> CardinalityLimiter:
         if redis.VERSION >= (4,):
             client = RedisCluster.from_url("redis://127.0.0.1:16379")
         else:
-            client = RedisCluster(startup_nodes=[{"host": "127.0.0.1", "port": "16379"}])
+            client = RedisCluster(
+                startup_nodes=[{"host": "127.0.0.1", "port": "16379"}]
+            )
         client.flushdb()
         return RedisCardinalityLimiter(client)
 
