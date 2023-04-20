@@ -37,6 +37,7 @@ jobs:
           python-version: 3.8
 
       - run: make develop
+      - run: pip install -U docker-compose
       - run: make redis-cluster
       - run: pip install redis==${{ matrix.redis-py }}
       - run: make test
