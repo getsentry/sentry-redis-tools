@@ -1,7 +1,7 @@
 develop:
 	pip install -e .
 	pip install -r ./requirements-dev.txt
-	docker-compose up
+	docker-compose up -d
 .PHONY: develop
 
 format:
