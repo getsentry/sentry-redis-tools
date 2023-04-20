@@ -4,3 +4,5 @@ mypy==0.971
 pytest>=7.2.0
 sphinx-autodoc-typehints[type-comment]>=1.19.3
 sphinx-rtd-theme
+rb>=1.9.0
+redis-py-cluster>=2.1.0
