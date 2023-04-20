@@ -1,7 +1,18 @@
 import time
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from typing import Collection, Iterator, List, Mapping, NamedTuple, Optional, Sequence, Tuple, Union, NoReturn
+from typing import (
+    Collection,
+    Iterator,
+    List,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    NoReturn,
+)
 
 try:
     from redis import RedisCluster
@@ -9,7 +20,7 @@ except ImportError:
     from rediscluster import RedisCluster
 
 try:
-    from rb import Cluster as _BlasterClient  # type: ignore
+    from rb import Cluster as _BlasterClient
 except ImportError:
     _BlasterClient = NoReturn
 
@@ -258,7 +269,9 @@ class RedisCardinalityLimiter(CardinalityLimiter):
     def _get_timeseries_key(request: RequestedQuota, hash: Hash) -> str:
         return f"cardinality:timeseries:{request.prefix}-{hash}"
 
-    def _get_read_sets_keys(self, request: RequestedQuota, timestamp: Timestamp) -> Sequence[str]:
+    def _get_read_sets_keys(
+        self, request: RequestedQuota, timestamp: Timestamp
+    ) -> Sequence[str]:
         oldest_time_bucket = list(request.quota.iter_window(timestamp))[-1]
         return [
             f"cardinality:sets:{request.prefix}-{shard}-{oldest_time_bucket}"
@@ -303,7 +316,9 @@ class RedisCardinalityLimiter(CardinalityLimiter):
             # quotas immediately.
             return timestamp, [
                 GrantedQuota(
-                    request=request, granted_unit_hashes=request.unit_hashes, reached_quota=None
+                    request=request,
+                    granted_unit_hashes=request.unit_hashes,
+                    reached_quota=None,
                 )
                 for request in requests
             ]
@@ -317,7 +332,9 @@ class RedisCardinalityLimiter(CardinalityLimiter):
         for request in requests:
             granted_hashes = []
 
-            set_count = sum(set_counts[k] for k in self._get_read_sets_keys(request, timestamp))
+            set_count = sum(
+                set_counts[k] for k in self._get_read_sets_keys(request, timestamp)
+            )
 
             if self.metrics_backend:
                 self.metrics_backend.timing(
@@ -381,7 +398,9 @@ class RedisCardinalityLimiter(CardinalityLimiter):
                 unit_key = self._get_timeseries_key(grant.request, hash)
                 unit_keys_to_set[unit_key] = key_ttl
 
-                for set_key in self._get_write_sets_keys(grant.request, timestamp, hash):
+                for set_key in self._get_write_sets_keys(
+                    grant.request, timestamp, hash
+                ):
                     set_keys_ttl[set_key] = key_ttl
                     set_keys_to_add[set_key].add(hash)
 

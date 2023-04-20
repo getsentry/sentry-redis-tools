@@ -3,6 +3,7 @@ from typing import Mapping, Optional, Protocol, Union, runtime_checkable
 
 Tags = Mapping[str, str]
 
+
 @runtime_checkable
 class Metrics(Protocol):
     """

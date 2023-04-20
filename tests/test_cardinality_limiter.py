@@ -14,23 +14,18 @@ import redis
 import rb
 
 
-@pytest.fixture(params=[
-    "rb", 'single',
-    'cluster'
-])
+@pytest.fixture(params=["rb", "single", "cluster"])
 def limiter(request: pytest.FixtureRequest) -> CardinalityLimiter:
 
     if request.param == "rb":
         redis.StrictRedis().flushdb()
-        return RedisCardinalityLimiter(rb.Cluster(hosts={0: {'port': 6379}}))
-    elif request.param == 'single':
+        return RedisCardinalityLimiter(rb.Cluster(hosts={0: {"port": 6379}}))
+    elif request.param == "single":
         client = redis.StrictRedis()
         client.flushdb()
         return RedisCardinalityLimiter(client)
-    elif request.param == 'cluster':
-        client = RedisCluster(startup_nodes=[
-            {"host": "127.0.0.1", "port": "16379"}
-        ])
+    elif request.param == "cluster":
+        client = RedisCluster(startup_nodes=[{"host": "127.0.0.1", "port": "16379"}])
         client.flushdb()
         return RedisCardinalityLimiter(client)
 
@@ -101,15 +96,21 @@ def test_multiple_prefixes(limiter: RedisCardinalityLimiter) -> None:
     quota = Quota(window_seconds=3600, granularity_seconds=60, limit=10)
     requests = [
         RequestedQuota(prefix="a", unit_hashes={1, 2, 3, 4, 5}, quota=quota),
-        RequestedQuota(prefix="b", unit_hashes={1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, quota=quota),
         RequestedQuota(
-            prefix="c", unit_hashes={11, 12, 13, 14, 15, 16, 17, 18, 19, 20}, quota=quota
+            prefix="b", unit_hashes={1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, quota=quota
+        ),
+        RequestedQuota(
+            prefix="c",
+            unit_hashes={11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
+            quota=quota,
         ),
     ]
     new_timestamp, grants = limiter.check_within_quotas(requests)
 
     assert grants == [
-        GrantedQuota(request=requests[0], granted_unit_hashes=[1, 2, 3, 4, 5], reached_quota=None),
+        GrantedQuota(
+            request=requests[0], granted_unit_hashes=[1, 2, 3, 4, 5], reached_quota=None
+        ),
         GrantedQuota(
             request=requests[1],
             granted_unit_hashes=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -125,16 +126,22 @@ def test_multiple_prefixes(limiter: RedisCardinalityLimiter) -> None:
 
     requests = [
         RequestedQuota(prefix="a", unit_hashes={6, 7, 8, 9, 10, 11}, quota=quota),
-        RequestedQuota(prefix="b", unit_hashes={1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, quota=quota),
         RequestedQuota(
-            prefix="c", unit_hashes={11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21}, quota=quota
+            prefix="b", unit_hashes={1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, quota=quota
+        ),
+        RequestedQuota(
+            prefix="c",
+            unit_hashes={11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21},
+            quota=quota,
         ),
     ]
     new_timestamp, grants = limiter.check_within_quotas(requests)
 
     assert grants == [
         GrantedQuota(
-            request=requests[0], granted_unit_hashes=[6, 7, 8, 9, 10], reached_quota=quota
+            request=requests[0],
+            granted_unit_hashes=[6, 7, 8, 9, 10],
+            reached_quota=quota,
         ),
         GrantedQuota(
             request=requests[1],
@@ -248,4 +255,15 @@ def test_regression_mixed_order(limiter: RedisCardinalityLimiter) -> None:
     # 5 was admitted in an earlier call, and 0..9 are admitted right before it.
     # there used to be a bug where anything after 10 (i.e. 5) was dropped as
     # well (due to a wrong `break` somewhere in a loop)
-    assert helper.add_values([0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 5]) == [0, 1, 2, 3, 4, 6, 7, 8, 9, 5]
+    assert helper.add_values([0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 5]) == [
+        0,
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        9,
+        5,
+    ]
