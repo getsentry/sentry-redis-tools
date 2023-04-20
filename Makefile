@@ -4,7 +4,7 @@ develop:
 .PHONY: develop
 
 redis-cluster:
-	docker-compose up -d
+	docker-compose up -d --wait
 .PHONY: redis-cluster
 
 format:
