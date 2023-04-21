@@ -11,20 +11,10 @@ from typing import (
     Sequence,
     Tuple,
     Union,
-    NoReturn,
 )
 
-try:
-    from redis import RedisCluster
-except ImportError:
-    from rediscluster import RedisCluster
-
-try:
-    from rb import Cluster as _BlasterClient
-except ImportError:
-    _BlasterClient = NoReturn
-
 from sentry_redis_tools.metrics import Metrics
+from sentry_redis_tools.clients import BlasterClient, RedisCluster, StrictRedis
 
 Hash = int
 Timestamp = int
@@ -234,7 +224,7 @@ class RedisCardinalityLimiter(CardinalityLimiter):
 
     def __init__(
         self,
-        client: Union[_BlasterClient, RedisCluster],
+        client: Union[BlasterClient, StrictRedis, RedisCluster],
         num_shards: int = 3,
         num_physical_shards: int = 3,
         metric_tags: Optional[Mapping[str, str]] = None,
@@ -254,7 +244,7 @@ class RedisCardinalityLimiter(CardinalityLimiter):
         """
         self.backend: RedisBackend = (
             RedisClusterBackend(client)
-            if not isinstance(client, _BlasterClient)
+            if not isinstance(client, BlasterClient)
             else RedisBlasterBackend(client)
         )
 
@@ -479,7 +469,7 @@ class RedisClusterBackend(RedisBackend):
 
 
 class RedisBlasterBackend(RedisBackend):
-    def __init__(self, client: _BlasterClient) -> None:
+    def __init__(self, client: BlasterClient) -> None:
         self.client = client
 
     def run_check_within_quotas(

@@ -1,7 +1,8 @@
-from typing import Collection, Optional, Sequence
+from typing import Collection, Optional, Sequence, Union
 
 import pytest
 
+from sentry_redis_tools.clients import StrictRedis, BlasterClient, RedisCluster
 from sentry_redis_tools.cardinality_limiter import (
     CardinalityLimiter,
     GrantedQuota,
@@ -9,32 +10,13 @@ from sentry_redis_tools.cardinality_limiter import (
     RedisCardinalityLimiter,
     RequestedQuota,
 )
-from sentry_redis_tools.cardinality_limiter import RedisCluster  # type: ignore
-import redis
-import rb
 
 
-@pytest.fixture(params=["rb", "single", "cluster"])
-def limiter(request: pytest.FixtureRequest) -> CardinalityLimiter:
-
-    if request.param == "rb":
-        redis.StrictRedis().flushdb()
-        return RedisCardinalityLimiter(rb.Cluster(hosts={0: {"port": 6379}}))
-    elif request.param == "single":
-        client = redis.StrictRedis()
-        client.flushdb()
-        return RedisCardinalityLimiter(client)
-    elif request.param == "cluster":
-        if redis.VERSION >= (4,):
-            client = RedisCluster.from_url("redis://127.0.0.1:16379")
-        else:
-            client = RedisCluster(
-                startup_nodes=[{"host": "127.0.0.1", "port": "16379"}]
-            )
-        client.flushdb()
-        return RedisCardinalityLimiter(client)
-
-    raise RuntimeError(f"invalid request.param {request.param}")
+@pytest.fixture
+def limiter(
+    redis_cluster_or_blaster_client: Union[StrictRedis, BlasterClient, RedisCluster]
+) -> CardinalityLimiter:
+    return RedisCardinalityLimiter(redis_cluster_or_blaster_client)
 
 
 class LimiterHelper:

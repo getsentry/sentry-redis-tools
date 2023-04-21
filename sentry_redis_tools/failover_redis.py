@@ -2,7 +2,7 @@ import random
 import time
 from typing import Any
 
-from redis.client import StrictRedis
+from sentry_redis_tools.clients import StrictRedis
 from redis.exceptions import (
     ConnectionError,
     ReadOnlyError,
