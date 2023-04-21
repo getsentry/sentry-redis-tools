@@ -3,6 +3,13 @@ develop:
 	pip install -r ./requirements-dev.txt
 .PHONY: develop
 
+redis-cluster:
+	docker-compose up -d
+	# wait for redis cluster to come up
+	for i in 1 2 3 4 5; do redis-cli -c -p 16379 hello && break; sleep $$i; done
+	
+.PHONY: redis-cluster
+
 format:
 	black sentry_redis_tools/ tests/
 .PHONY: format

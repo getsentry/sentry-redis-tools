@@ -1,0 +1,16 @@
+---
+version: '3'
+services:
+  redis-cluster:
+    # Pinning to v6 until https://github.com/Grokzen/docker-redis-cluster/issues/155 is released
+    image: grokzen/redis-cluster:6.2.11
+    ports:
+      - '16379-16384:16379-16384'
+    environment:
+      IP: '0.0.0.0'
+      INITIAL_PORT: 16379
+
+  single-redis:
+    image: redis
+    ports:
+      - '6379:6379'
