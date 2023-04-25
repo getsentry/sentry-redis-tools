@@ -6,3 +6,5 @@ sentry-redis-tools
    :caption: Contents:
 
    failover_redis.rst
+   sliding_windows_rate_limiter.rst
+   cardinality_limiter.rst
