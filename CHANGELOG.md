@@ -1,5 +1,12 @@
 # Changelog and versioning
 
+## 0.1.5
+
+### Various fixes & improvements
+
+- feat: Add sliding window rate limiter (#5) by @untitaker
+- feat: Add cardinality limiter (#4) by @untitaker
+
 ## 0.1.4
 
 ### Various fixes & improvements
