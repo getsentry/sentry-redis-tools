@@ -8,6 +8,7 @@ setup(
     version="0.1.4",
     author="Sentry",
     author_email="oss@sentry.io",
+    license="Apache-2.0",
     url="https://github.com/getsentry/sentry-redis-tools",
     description="Common utilities related to how Sentry uses Redis",
     zip_safe=False,
