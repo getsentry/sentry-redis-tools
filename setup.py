@@ -5,7 +5,7 @@ from typing import Sequence
 
 setup(
     name="sentry-redis-tools",
-    version="0.1.4",
+    version="0.1.5",
     author="Sentry",
     author_email="oss@sentry.io",
     url="https://github.com/getsentry/sentry-redis-tools",
