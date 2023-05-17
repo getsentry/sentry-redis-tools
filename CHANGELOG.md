@@ -1,5 +1,12 @@
 # Changelog and versioning
 
+## 0.1.6
+
+### Various fixes & improvements
+
+- feat: Add retrying redis cluster (#7) by @untitaker
+- fix: Make license Apache (#6) by @untitaker
+
 ## 0.1.5
 
 ### Various fixes & improvements
