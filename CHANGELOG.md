@@ -1,5 +1,11 @@
 # Changelog and versioning
 
+## 0.1.7
+
+### Various fixes & improvements
+
+- fix: Also failover for pipelines (#8) by @untitaker
+
 ## 0.1.6
 
 ### Various fixes & improvements
