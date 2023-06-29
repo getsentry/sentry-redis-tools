@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import random
 import time
-from typing import Any
+from typing import Any, Callable, Optional
 
 from sentry_redis_tools.clients import StrictRedis
 from redis.exceptions import (
@@ -8,6 +10,47 @@ from redis.exceptions import (
     ReadOnlyError,
     TimeoutError,
 )
+
+
+def _sentry_wrap_with_retry(
+    get_wrapped_fn: Callable[[], Any], client_self: Optional[FailoverRedis] = None
+) -> Any:
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        nonlocal client_self
+        slf = client_self
+        if slf is None:
+            slf = args[0]
+        assert slf is not None
+
+        retries = 0
+        while True:
+            try:
+                return get_wrapped_fn()(*args, **kwargs)
+            except (
+                # Caught during the inital phase of failver when writes are
+                # paused on primary
+                ReadOnlyError,
+                # When the connection to primary is dropped and the one to the
+                # replica is not ready yet.
+                # ConnectionError with the errno ETIMEDOUT = 110
+                ConnectionError,
+                # When the client is initiated with socket_timeout or
+                # socket_connect_timeout, during the reconnect it throws
+                # redis.exceptions.TimeoutError instead of ConnectionError
+                TimeoutError,
+            ):
+                if retries >= slf._retries:
+                    raise
+                time.sleep(
+                    min(
+                        slf._backoff_max,
+                        (slf._backoff_min * (slf._backoff_multiplier**retries))
+                        * (1 + random.random()),
+                    )
+                )
+                retries += 1
+
+    return wrapper
 
 
 class FailoverRedis(StrictRedis):  # type: ignore
@@ -86,31 +129,10 @@ class FailoverRedis(StrictRedis):  # type: ignore
         self._backoff_multiplier = _backoff_multiplier
         super().__init__(*args, **kwargs)
 
-    def execute_command(self, *args: Any, **kwargs: Any) -> Any:
-        retries = 0
-        while True:
-            try:
-                return super().execute_command(*args, **kwargs)
-            except (
-                # Caught during the inital phase of failver when writes are
-                # paused on primary
-                ReadOnlyError,
-                # When the connection to primary is dropped and the one to the
-                # replica is not ready yet.
-                # ConnectionError with the errno ETIMEDOUT = 110
-                ConnectionError,
-                # When the client is initiated with socket_timeout or
-                # socket_connect_timeout, during the reconnect it throws
-                # redis.exceptions.TimeoutError instead of ConnectionError
-                TimeoutError,
-            ):
-                if retries >= self._retries:
-                    raise
-                time.sleep(
-                    min(
-                        self._backoff_max,
-                        (self._backoff_min * (self._backoff_multiplier**retries))
-                        * (1 + random.random()),
-                    )
-                )
-                retries += 1
+    execute_command = _sentry_wrap_with_retry(lambda: StrictRedis.execute_command)
+
+    def pipeline(self, *args: Any, **kwargs: Any) -> Any:
+        rv = StrictRedis.pipeline(self, *args, **kwargs)
+        old_execute = rv.execute
+        rv.execute = _sentry_wrap_with_retry(lambda: old_execute, client_self=self)
+        return rv
