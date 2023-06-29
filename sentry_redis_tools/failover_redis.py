@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 import time
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from sentry_redis_tools.clients import StrictRedis
 from redis.exceptions import (
@@ -12,7 +12,9 @@ from redis.exceptions import (
 )
 
 
-def _sentry_wrap_with_retry(get_wrapped_fn, client_self: Optional[FailoverRedis]=None) -> Any:
+def _sentry_wrap_with_retry(
+    get_wrapped_fn: Callable[[], Any], client_self: Optional[FailoverRedis] = None
+) -> Any:
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         nonlocal client_self
         slf = client_self
@@ -49,7 +51,6 @@ def _sentry_wrap_with_retry(get_wrapped_fn, client_self: Optional[FailoverRedis]
                 retries += 1
 
     return wrapper
-
 
 
 class FailoverRedis(StrictRedis):  # type: ignore
@@ -130,7 +131,7 @@ class FailoverRedis(StrictRedis):  # type: ignore
 
     execute_command = _sentry_wrap_with_retry(lambda: StrictRedis.execute_command)
 
-    def pipeline(self, *args, **kwargs) -> Any:
+    def pipeline(self, *args: Any, **kwargs: Any) -> Any:
         rv = StrictRedis.pipeline(self, *args, **kwargs)
         old_execute = rv.execute
         rv.execute = _sentry_wrap_with_retry(lambda: old_execute, client_self=self)
