@@ -5,6 +5,7 @@ import time
 from typing import Any, Callable, Optional
 
 from sentry_redis_tools.clients import StrictRedis
+from redis.client import Pipeline
 from redis.exceptions import (
     ConnectionError,
     ReadOnlyError,
@@ -27,7 +28,7 @@ def _sentry_wrap_with_retry(
             try:
                 return get_wrapped_fn()(*args, **kwargs)
             except (
-                # Caught during the inital phase of failver when writes are
+                # Caught during the initial phase of fail-over when writes are
                 # paused on primary
                 ReadOnlyError,
                 # When the connection to primary is dropped and the one to the
@@ -53,7 +54,7 @@ def _sentry_wrap_with_retry(
     return wrapper
 
 
-class FailoverRedis(StrictRedis):  # type: ignore
+class FailoverRedis(StrictRedis):
     """
     Single host redis client implementation with retry logic intended to
     survive failover events. Retry logic uses capped exponential backoff with
@@ -131,8 +132,8 @@ class FailoverRedis(StrictRedis):  # type: ignore
 
     execute_command = _sentry_wrap_with_retry(lambda: StrictRedis.execute_command)
 
-    def pipeline(self, *args: Any, **kwargs: Any) -> Any:
+    def pipeline(self, *args: Any, **kwargs: Any) -> Pipeline:
         rv = StrictRedis.pipeline(self, *args, **kwargs)
         old_execute = rv.execute
-        rv.execute = _sentry_wrap_with_retry(lambda: old_execute, client_self=self)
+        rv.execute = _sentry_wrap_with_retry(lambda: old_execute, client_self=self)  # type: ignore
         return rv

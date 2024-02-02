@@ -231,12 +231,12 @@ class RedisCardinalityLimiter(CardinalityLimiter):
         metrics_backend: Optional[Metrics] = None,
     ) -> None:
         """
-        :param cluster: Name of the redis cluster to use, to be configured with
+        :param client: Name of the redis cluster to use, to be configured with
             the `redis.clusters` Sentry option (like any other redis cluster in
             Sentry).
-        :param cluster_num_shards: The number of logical shards to have. This
+        :param num_shards: The number of logical shards to have. This
             controls the average set size in Redis.
-        :param cluster_num_physical_shards: The number of actual shards to
+        :param num_physical_shards: The number of actual shards to
             store. Controls how many keys of type "unordered set" there are in
             Redis. The ratio `cluster_num_physical_shards / cluster_num_shards`
             is a sampling rate, the lower it is, the less precise accounting
@@ -295,8 +295,8 @@ class RedisCardinalityLimiter(CardinalityLimiter):
         set_keys_to_count: List[str] = []
 
         for request in requests:
-            for hash in request.unit_hashes:
-                unit_keys_to_get.append(self._get_timeseries_key(request, hash))
+            for unit_hash in request.unit_hashes:
+                unit_keys_to_get.append(self._get_timeseries_key(request, unit_hash))
 
             set_keys_to_count.extend(self._get_read_sets_keys(request, timestamp))
 
@@ -335,7 +335,7 @@ class RedisCardinalityLimiter(CardinalityLimiter):
 
             remaining_limit = max(
                 0,
-                request.quota.limit - cardinality_sample_factor * set_count,
+                int(request.quota.limit - cardinality_sample_factor * set_count),
             )
 
             remaining_limit_running = remaining_limit
@@ -343,7 +343,7 @@ class RedisCardinalityLimiter(CardinalityLimiter):
 
             # for each hash in the request, check if:
             # 1. the hash is in `unit_keys`. If so, it has already been seen in
-            #    this timewindow, and ingesting additional copies of it comes
+            #    this time window, and ingesting additional copies of it comes
             #    at no cost (= ingesting multiple metric buckets of the same
             #    timeseries only counts once against quota)
             #
@@ -420,7 +420,7 @@ class RedisBackend(ABC):
 
 
 class RedisClusterBackend(RedisBackend):
-    def __init__(self, client: RedisCluster) -> None:
+    def __init__(self, client: Union[BlasterClient, StrictRedis, RedisCluster]) -> None:
         self.client = client
 
     def run_check_within_quotas(

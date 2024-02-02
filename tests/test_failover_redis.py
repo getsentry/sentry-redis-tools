@@ -64,5 +64,5 @@ def test_pipelines(time_sleep: mock.Mock, execute_command: mock.Mock) -> None:
     with pytest.raises(ConnectionError):
         pipe = client.pipeline()
         pipe.get("key")
-        pipe.execute()
+        pipe.execute()  # type: ignore
     assert all(a[0][0] <= 1.0 for a in time_sleep.call_args_list)

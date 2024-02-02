@@ -1,19 +1,14 @@
 from typing import Union, Type
 
 import pytest
-import redis
 
 from sentry_redis_tools.clients import StrictRedis, BlasterClient, RedisCluster
 
 
 def initialize_redis_cluster(cls: Type[RedisCluster] = RedisCluster) -> RedisCluster:
-    if redis.VERSION >= (4,):
-        client = cls.from_url("redis://127.0.0.1:16379")
-    else:
-        client = cls(startup_nodes=[{"host": "127.0.0.1", "port": "16379"}])
-
+    client = cls.from_url("redis://127.0.0.1:16379")  # type: ignore
     client.flushdb()
-    return client
+    return client  # type: ignore
 
 
 def _build_client(param: str) -> Union[StrictRedis, RedisCluster, BlasterClient]:

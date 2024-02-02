@@ -6,8 +6,6 @@ from unittest import mock
 from redis.exceptions import BusyLoadingError, ConnectionError
 from sentry_redis_tools.retrying_cluster import ClusterError, RetryingRedisCluster
 
-from tests.conftest import initialize_redis_cluster
-
 
 @pytest.mark.parametrize(
     "exception_cls",
@@ -20,7 +18,8 @@ from tests.conftest import initialize_redis_cluster
 )
 @mock.patch("sentry_redis_tools.clients.RedisCluster.execute_command")
 def test_basic(execute_command: mock.Mock, exception_cls: Type[Exception]) -> None:
-    client = initialize_redis_cluster(cls=RetryingRedisCluster)
+    client = RetryingRedisCluster.from_url("redis://127.0.0.1:16379")  # type: ignore
+    client.flushdb()
 
     execute_command.side_effect = exception_cls()
     execute_command.reset_mock()

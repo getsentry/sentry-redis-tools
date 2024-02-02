@@ -57,7 +57,9 @@ def test_basic(limiter: RedisCardinalityLimiter) -> None:
     for _ in range(20):
         assert helper.add_value(2) == 2
 
-    assert [helper.add_value(10 + i) for i in range(100)] == list(range(10, 18)) + [None] * 92  # type: ignore
+    assert [helper.add_value(10 + i) for i in range(100)] == list(range(10, 18)) + [
+        None
+    ] * 92
 
     helper.timestamp += 3600
 
@@ -67,7 +69,9 @@ def test_basic(limiter: RedisCardinalityLimiter) -> None:
     # `cardinality:timeseries` keys for 1, 2 still exist in this test setup
     # (and we would admit them on top of 10..20), but they won't in a
     # real-world scenario
-    assert [helper.add_value(10 + i) for i in range(100)] == list(range(10, 20)) + [None] * 90  # type: ignore
+    assert [helper.add_value(10 + i) for i in range(100)] == list(range(10, 20)) + [
+        None
+    ] * 90
 
 
 def test_multiple_prefixes(limiter: RedisCardinalityLimiter) -> None:
@@ -226,7 +230,7 @@ def test_sampling_going_bad(limiter: RedisCardinalityLimiter) -> None:
     # when adding "hashes" 0..10 in ascending order, the first hash will fill
     # up the physical shard, and a total count of 10 is extrapolated from that
     admissions = [helper.add_value(i) for i in range(10)]
-    assert admissions == [0] + [None] * 9  # type: ignore
+    assert admissions == [0] + [None] * 9
 
 
 def test_regression_mixed_order(limiter: RedisCardinalityLimiter) -> None:
