@@ -1,5 +1,12 @@
 # Changelog and versioning
 
+## 0.2.0
+
+### Various fixes & improvements
+
+- fix: move `redis-py-cluster` to optional deps (#10) by @anonrig
+- build: update github actions (#11) by @anonrig
+
 ## 0.1.7
 
 ### Various fixes & improvements
