@@ -12,10 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
 
       - run: make develop
       - run: make lint
@@ -31,13 +29,12 @@ jobs:
       matrix:
         redis-py: [3.*, 4.*]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
 
+      - name: Install redis-cli
+        run: sudo apt-get install redis-tools
       - run: make develop
-      - run: pip install -U docker-compose
       - run: make redis-cluster
       - run: pip install redis==${{ matrix.redis-py }}
       - run: make test
