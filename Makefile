@@ -1,5 +1,5 @@
 develop:
-	pip install -e .
+	pip install -e .[cluster]
 	pip install -r ./requirements-dev.txt
 .PHONY: develop
 
