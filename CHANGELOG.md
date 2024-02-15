@@ -1,5 +1,11 @@
 # Changelog and versioning
 
+## 0.3.0
+
+### Various fixes & improvements
+
+- feat: remove `rediscluster` (#12) by @anonrig
+
 ## 0.2.0
 
 ### Various fixes & improvements
