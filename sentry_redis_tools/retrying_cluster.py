@@ -1,12 +1,6 @@
 from typing import Any
-from sentry_redis_tools.clients import RedisCluster
-
-from redis.exceptions import BusyLoadingError, ConnectionError
-
-try:
-    from redis.exceptions import ClusterError
-except ImportError:
-    from rediscluster.exceptions import ClusterError
+from redis.cluster import RedisCluster
+from redis.exceptions import BusyLoadingError, ConnectionError, ClusterError
 
 __all__ = ["ClusterError", "RetryingRedisCluster"]
 
@@ -29,12 +23,6 @@ class RetryingRedisCluster(RedisCluster):  # type: ignore
             ClusterError,
             KeyError,  # see: https://github.com/Grokzen/redis-py-cluster/issues/287
         ):
-            # Codepath for redis-py-cluster
-            if hasattr(self, "connection_pool"):
-                self.connection_pool.nodes.reset()
-
-            # Codepath for redis.cluster
-            #
             # the code in the RedisCluster __init__ idiotically sets
             # self.nodes_manager = None
             # self.nodes_manager = NodesManager(...)
