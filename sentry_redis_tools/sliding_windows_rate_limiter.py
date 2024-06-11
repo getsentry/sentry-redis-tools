@@ -232,7 +232,7 @@ class RedisSlidingWindowRateLimiter:
         )
 
     def check_within_quotas(
-        self, requests: Sequence[RequestedQuota], timestamp: Optional[Timestamp] = None, quota_throttle_divider: int = 1, threads_throttle_divier: int = 1
+        self, requests: Sequence[RequestedQuota], timestamp: Optional[Timestamp] = None, quota_throttle_divider: int = 1
     ) -> Tuple[Timestamp, Sequence[GrantedQuota]]:
         """
         Check whether the given requests are within quota, but do not actually consume quota.
@@ -321,7 +321,7 @@ class RedisSlidingWindowRateLimiter:
                     granted_quota = remaining_quota
                     reached_quotas.append(quota)
 
-                should_throttle = used_quota > quota.limit * quota_throttle_divider
+                should_throttle = used_quota > max(1, quota.limit // quota_throttle_divider)
 
             for quota in request.quotas:
                 if quota.prefix_override:
