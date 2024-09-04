@@ -1,6 +1,11 @@
 from typing import Any
 from redis.cluster import RedisCluster
-from redis.exceptions import BusyLoadingError, ConnectionError, ClusterError
+from redis.exceptions import (
+    BusyLoadingError,
+    ConnectionError,
+    ClusterError,
+    TimeoutError,
+)
 
 __all__ = ["ClusterError", "RetryingRedisCluster"]
 
@@ -21,6 +26,7 @@ class RetryingRedisCluster(RedisCluster):  # type: ignore
             ConnectionError,
             BusyLoadingError,
             ClusterError,
+            TimeoutError,
             KeyError,  # see: https://github.com/Grokzen/redis-py-cluster/issues/287
         ):
             # the code in the RedisCluster __init__ idiotically sets
