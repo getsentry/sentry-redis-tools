@@ -1,15 +1,15 @@
 ---
-version: "3"
+version: '3'
 services:
   redis-cluster:
-    image: grokzen/redis-cluster:6.2.11
+    image: grokzen/redis-cluster:7.0.10
     ports:
-      - "16379-16384:16379-16384"
+      - '16379-16384:16379-16384'
     environment:
-      IP: "0.0.0.0"
+      IP: '0.0.0.0'
       INITIAL_PORT: 16379
 
   single-redis:
     image: redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
