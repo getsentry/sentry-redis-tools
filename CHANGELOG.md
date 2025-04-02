@@ -1,5 +1,11 @@
 # Changelog and versioning
 
+## 0.4.0
+
+### Retry `TimeoutError`
+
+- feat: support retries for `TimeoutError` (#18) by @mwarkentin @kneeyo1
+
 ## 0.3.0
 
 ### Various fixes & improvements
