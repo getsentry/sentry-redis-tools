@@ -1,5 +1,11 @@
 # Changelog and versioning
 
+## 0.5.0
+
+### Various fixes & improvements
+
+- feat: Revert remove `rediscluster` (#21) by @shruthilayaj
+
 ## 0.4.0
 
 ### Retry `TimeoutError`
