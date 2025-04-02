@@ -4,7 +4,7 @@ import random
 import time
 from typing import Any, Callable, Optional
 
-from redis.client import Pipeline, StrictRedis
+from sentry_redis_tools.clients import StrictRedis
 from redis.exceptions import (
     ConnectionError,
     ReadOnlyError,
@@ -131,7 +131,7 @@ class FailoverRedis(StrictRedis):  # type: ignore
 
     execute_command = _sentry_wrap_with_retry(lambda: StrictRedis.execute_command)
 
-    def pipeline(self, *args: Any, **kwargs: Any) -> Pipeline:
+    def pipeline(self, *args: Any, **kwargs: Any) -> Any:
         rv = StrictRedis.pipeline(self, *args, **kwargs)
         old_execute = rv.execute
         rv.execute = _sentry_wrap_with_retry(lambda: old_execute, client_self=self)
