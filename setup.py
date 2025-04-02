@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="sentry-redis-tools",
-    version="0.3.0",
+    version="0.4.0",
     author="Sentry",
     author_email="oss@sentry.io",
     license="Apache-2.0",
