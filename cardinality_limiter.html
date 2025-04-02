@@ -1,0 +1,174 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cardinality Limiter &mdash; sentry-redis-tools  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Sliding Windows Rate Rimiter" href="sliding_windows_rate_limiter.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            sentry-redis-tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="failover_redis.html">FailoverRedis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sliding_windows_rate_limiter.html">Sliding Windows Rate Rimiter</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Cardinality Limiter</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#sentry_redis_tools.cardinality_limiter.RedisCardinalityLimiter"><code class="docutils literal notranslate"><span class="pre">RedisCardinalityLimiter</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">sentry-redis-tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Cardinality Limiter</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cardinality_limiter.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="cardinality-limiter">
+<h1>Cardinality Limiter<a class="headerlink" href="#cardinality-limiter" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="sentry_redis_tools.cardinality_limiter.RedisCardinalityLimiter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sentry_redis_tools.cardinality_limiter.</span></span><span class="sig-name descname"><span class="pre">RedisCardinalityLimiter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_shards</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_physical_shards</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_tags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics_backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sentry_redis_tools.cardinality_limiter.RedisCardinalityLimiter" title="Permalink to this definition"></a></dt>
+<dd><p>The Redis cardinality limiter stores a key per unit hash, and adds the unit
+hash to a set key prefixed with <cite>RequestedQuota.prefix</cite>. The memory usage
+grows with the dimensionality of <cite>prefix</cite> and the configured quota limit
+per prefix (i.e. the maximum cardinality of
+<cite>GrantedQuota.granted_unit_hashes</cite>).</p>
+<p>Many design decisions for this cardinality limiter were copied from the
+sliding_windows rate limiter. You will find the next couple of paragraphs
+in its documentation as well.</p>
+<p>Why is checking quotas and using quotas two separate implementations?
+Isn’t that a time-of-check-time-of-use bug, and allows me to over-spend
+quota when requests are happening concurrently?</p>
+<ol class="arabic">
+<li><p>It’s desirable to first check quotas, then do a potentially fallible
+operation, then consume quotas. This rate limiter is primarily going to
+be used inside of the metrics string indexer to rate-limit database
+writes. What we want to do there is: read DB, check rate limits,
+write to DB, use rate limits.</p>
+<p>If we did it any other way (the obvious one being to read DB,
+check-and-use rate limits, write DB), crashes while writing to the
+database can over-consume quotas. This is not a big problem if those
+crashes are flukes, and especially not a problem if the crashes are
+a result of an overloaded DB.</p>
+<p>It is however a problem in case the consumer is crash-looping, or
+crashing (quickly) for 100% of requests (e.g. due to schema
+mismatches between code and DB that somehow don’t surface during the
+DB read). In that case the quotas would be consumed immediately and
+incident recovery would require us to reset all quotas manually (or
+disable rate limiting via some killswitch)</p>
+</li>
+</ol>
+<ol class="arabic" start="3">
+<li><p>The redis backend (really the only backend we care about) already
+has some consistency problems.</p>
+<ol class="loweralpha">
+<li><p>Redis only provides strong consistency and ability to
+check-and-increment counters when all involved keys hit the same
+Redis node. That means that a quota with prefix=”org_id:123” can
+only run on a single redis node. It also means that a global
+quota (<cite>prefix=”global”</cite>) would have to run on a single
+(unchangeable) redis node to be strongly consistent. That’s
+however a problem for scalability.</p>
+<p>There’s no obvious way to make global quotas consistent with
+per-org quotas this way, so right now it means that requests
+containing multiple quotas with different <cite>prefixes</cite> cannot be
+checked-and-incremented atomically even if we were to change the
+rate-limiter’s interface.</p>
+</li>
+<li><p>This is easily fixable, but because of the above, we
+currently don’t control Redis sharding at all, meaning that even
+keys within a single quota’s window will hit different Redis
+node. This also helps further distribute the load internally.</p>
+<p>Since we have given up on atomic check-and-increments in general
+anyway, there’s no reason to explicitly control sharding.</p>
+</li>
+</ol>
+</li>
+</ol>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="sliding_windows_rate_limiter.html" class="btn btn-neutral float-left" title="Sliding Windows Rate Rimiter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Sentry.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

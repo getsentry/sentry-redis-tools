@@ -1,0 +1,309 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sliding Windows Rate Rimiter &mdash; sentry-redis-tools  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Cardinality Limiter" href="cardinality_limiter.html" />
+    <link rel="prev" title="FailoverRedis" href="failover_redis.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            sentry-redis-tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="failover_redis.html">FailoverRedis</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Sliding Windows Rate Rimiter</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sentry_redis_tools.sliding_windows_rate_limiter.GrantedQuota"><code class="docutils literal notranslate"><span class="pre">GrantedQuota</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sentry_redis_tools.sliding_windows_rate_limiter.InvalidConfiguration"><code class="docutils literal notranslate"><span class="pre">InvalidConfiguration</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sentry_redis_tools.sliding_windows_rate_limiter.Quota"><code class="docutils literal notranslate"><span class="pre">Quota</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sentry_redis_tools.sliding_windows_rate_limiter.Quota.iter_window"><code class="docutils literal notranslate"><span class="pre">Quota.iter_window()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sentry_redis_tools.sliding_windows_rate_limiter.Quota.limit"><code class="docutils literal notranslate"><span class="pre">Quota.limit</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter"><code class="docutils literal notranslate"><span class="pre">RedisSlidingWindowRateLimiter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter.check_and_use_quotas"><code class="docutils literal notranslate"><span class="pre">RedisSlidingWindowRateLimiter.check_and_use_quotas()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter.check_within_quotas"><code class="docutils literal notranslate"><span class="pre">RedisSlidingWindowRateLimiter.check_within_quotas()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter.use_quotas"><code class="docutils literal notranslate"><span class="pre">RedisSlidingWindowRateLimiter.use_quotas()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sentry_redis_tools.sliding_windows_rate_limiter.RequestedQuota"><code class="docutils literal notranslate"><span class="pre">RequestedQuota</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cardinality_limiter.html">Cardinality Limiter</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">sentry-redis-tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Sliding Windows Rate Rimiter</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/sliding_windows_rate_limiter.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-sentry_redis_tools.sliding_windows_rate_limiter">
+<span id="sliding-windows-rate-rimiter"></span><h1>Sliding Windows Rate Rimiter<a class="headerlink" href="#module-sentry_redis_tools.sliding_windows_rate_limiter" title="Permalink to this heading"></a></h1>
+<p>The ratelimiter used by the metrics string indexer to rate-limit DB writes.</p>
+<p>As opposed to the API rate limiter, a limit in the “sliding window” rate
+limiter such as “10 requests / minute” does not reset to 0 every minute.
+Instead each window can be configured with a “granularity” setting such that
+the window gradually resets in steps of <cite>granularity</cite> seconds.</p>
+<p>Additionally this rate-limiter is not coupled to per-project/organization
+scopes, and can apply multiple sliding windows at once. On the flipside it is
+not strongly consistent and depending on usage it is very easy to over-spend
+quota, as checking quota and spending quota are two separate steps.</p>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h2>
+<p>We want to enforce the number of requests per organization via two limits:</p>
+<ul class="simple">
+<li><p>100 per 30-second</p></li>
+<li><p>10 per 3-seconds</p></li>
+</ul>
+<p>On every request, our API endpoint calls:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">check_and_use_quotas</span><span class="p">(</span><span class="n">RequestedQuota</span><span class="p">(</span>
+    <span class="n">prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;org-id:</span><span class="si">{</span><span class="n">org_id</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">quotas</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">Quota</span><span class="p">(</span>
+            <span class="n">window_seconds</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+            <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+
+            <span class="c1"># can be arbitrary depending on how &quot;sliding&quot; the sliding</span>
+            <span class="c1"># window should be. This one configures per-10-second granularity</span>
+            <span class="c1"># to make the example simpler</span>
+            <span class="n">granularity</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">Quota</span><span class="p">(</span>
+            <span class="n">window_seconds</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+            <span class="n">granularity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">]</span>
+<span class="p">))</span>
+</pre></div>
+</div>
+<p>For a request happening at time <cite>900</cite> for <cite>org_id=123</cite>, the redis backend
+checks the following keys:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sliding</span><span class="o">-</span><span class="n">window</span><span class="o">-</span><span class="n">rate</span><span class="o">-</span><span class="n">limit</span><span class="p">:</span><span class="mi">123</span><span class="p">:</span><span class="mi">3</span><span class="p">:</span><span class="mi">900</span>
+<span class="n">sliding</span><span class="o">-</span><span class="n">window</span><span class="o">-</span><span class="n">rate</span><span class="o">-</span><span class="n">limit</span><span class="p">:</span><span class="mi">123</span><span class="p">:</span><span class="mi">3</span><span class="p">:</span><span class="mi">899</span>
+<span class="n">sliding</span><span class="o">-</span><span class="n">window</span><span class="o">-</span><span class="n">rate</span><span class="o">-</span><span class="n">limit</span><span class="p">:</span><span class="mi">123</span><span class="p">:</span><span class="mi">3</span><span class="p">:</span><span class="mi">898</span>
+<span class="n">sliding</span><span class="o">-</span><span class="n">window</span><span class="o">-</span><span class="n">rate</span><span class="o">-</span><span class="n">limit</span><span class="p">:</span><span class="mi">123</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">90</span>
+<span class="n">sliding</span><span class="o">-</span><span class="n">window</span><span class="o">-</span><span class="n">rate</span><span class="o">-</span><span class="n">limit</span><span class="p">:</span><span class="mi">123</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">89</span>
+<span class="n">sliding</span><span class="o">-</span><span class="n">window</span><span class="o">-</span><span class="n">rate</span><span class="o">-</span><span class="n">limit</span><span class="p">:</span><span class="mi">123</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">88</span>
+</pre></div>
+</div>
+<p>…none of which exist, so the values are assumed 0 and the request goes
+through. It then sets the following keys:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sliding</span><span class="o">-</span><span class="n">window</span><span class="o">-</span><span class="n">rate</span><span class="o">-</span><span class="n">limit</span><span class="p">:</span><span class="mi">123</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">90</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="n">sliding</span><span class="o">-</span><span class="n">window</span><span class="o">-</span><span class="n">rate</span><span class="o">-</span><span class="n">limit</span><span class="p">:</span><span class="mi">123</span><span class="p">:</span><span class="mi">3</span><span class="p">:</span><span class="mi">900</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>Another request for the same org happens at time <cite>902</cite>.</p>
+<ul class="simple">
+<li><p>The keys starting with <code class="docutils literal notranslate"><span class="pre">:123:30:</span></code> sum up to 1, so the 30-second limit of 100 is not exceeded.</p></li>
+<li><p>The keys starting with <code class="docutils literal notranslate"><span class="pre">:123:3:</span></code> sum up to 1, so the 3-second limit of 10 is not exceeded.</p></li>
+</ul>
+<p>This request is granted the minimum allowed from the two requested, in this case that is 9 (3-second limit of 10 - 1 used)</p>
+<p>Because no quota is exceeded, the request is granted. If one quota summed up to
+100 or 10, respectively, the request would be rejected.</p>
+<p>When using the quotas, the keys change as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sliding</span><span class="o">-</span><span class="n">window</span><span class="o">-</span><span class="n">rate</span><span class="o">-</span><span class="n">limit</span><span class="p">:</span><span class="mi">123</span><span class="p">:</span><span class="mi">3</span><span class="p">:</span><span class="mi">900</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">sliding</span><span class="o">-</span><span class="n">window</span><span class="o">-</span><span class="n">rate</span><span class="o">-</span><span class="n">limit</span><span class="p">:</span><span class="mi">123</span><span class="p">:</span><span class="mi">3</span><span class="p">:</span><span class="mi">902</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">sliding</span><span class="o">-</span><span class="n">window</span><span class="o">-</span><span class="n">rate</span><span class="o">-</span><span class="n">limit</span><span class="p">:</span><span class="mi">123</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">90</span> <span class="o">=</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="sentry_redis_tools.sliding_windows_rate_limiter.GrantedQuota">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sentry_redis_tools.sliding_windows_rate_limiter.</span></span><span class="sig-name descname"><span class="pre">GrantedQuota</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">granted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reached_quotas</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sentry_redis_tools.sliding_windows_rate_limiter.GrantedQuota" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="sentry_redis_tools.sliding_windows_rate_limiter.InvalidConfiguration">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sentry_redis_tools.sliding_windows_rate_limiter.</span></span><span class="sig-name descname"><span class="pre">InvalidConfiguration</span></span><a class="headerlink" href="#sentry_redis_tools.sliding_windows_rate_limiter.InvalidConfiguration" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sentry_redis_tools.sliding_windows_rate_limiter.Quota">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sentry_redis_tools.sliding_windows_rate_limiter.</span></span><span class="sig-name descname"><span class="pre">Quota</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">granularity_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sentry_redis_tools.sliding_windows_rate_limiter.Quota" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="sentry_redis_tools.sliding_windows_rate_limiter.Quota.iter_window">
+<span class="sig-name descname"><span class="pre">iter_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request_timestamp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sentry_redis_tools.sliding_windows_rate_limiter.Quota.iter_window" title="Permalink to this definition"></a></dt>
+<dd><p>Iterate over the quota’s window, yielding values representing each
+(absolute) granule.</p>
+<p>This function is used to calculate keys for storing the number of
+requests made in each granule.</p>
+<p>The iteration is done in reverse-order (newest timestamp to oldest),
+starting with the key to which a currently-processed request should be
+added. That request’s timestamp is <cite>request_timestamp</cite>.
+:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
+<ul class="simple">
+<li><p><cite>request_timestamp / self.granularity_seconds - 1</cite></p></li>
+<li><p><cite>request_timestamp / self.granularity_seconds - 2</cite></p></li>
+<li><p><cite>request_timestamp / self.granularity_seconds - 3</cite></p></li>
+<li><p>…</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sentry_redis_tools.sliding_windows_rate_limiter.Quota.limit">
+<span class="sig-name descname"><span class="pre">limit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#sentry_redis_tools.sliding_windows_rate_limiter.Quota.limit" title="Permalink to this definition"></a></dt>
+<dd><p>How many units are allowed within the given window.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sentry_redis_tools.sliding_windows_rate_limiter.</span></span><span class="sig-name descname"><span class="pre">RedisSlidingWindowRateLimiter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter" title="Permalink to this definition"></a></dt>
+<dd><p>The main class to instantiate for the rate limiter.</p>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">quotas</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">Quota</span><span class="p">(</span>
+        <span class="n">window_seconds</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">granularity_seconds</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">]</span>
+
+<span class="k">for</span> <span class="n">timestamp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">limiter</span><span class="o">.</span><span class="n">check_and_use_quotas</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">RequestedQuota</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="n">requested</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">quotas</span><span class="o">=</span><span class="n">quotas</span><span class="p">)],</span>
+        <span class="n">timestamp</span><span class="o">=</span><span class="n">TIMESTAMP_OFFSET</span> <span class="o">+</span> <span class="n">timestamp</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">resp</span> <span class="o">==</span> <span class="p">[</span><span class="n">GrantedQuota</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="n">granted</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">reached_quotas</span><span class="o">=</span><span class="p">[])]</span>
+
+<span class="n">resp</span> <span class="o">=</span> <span class="n">limiter</span><span class="o">.</span><span class="n">check_and_use_quotas</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">RequestedQuota</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="n">requested</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">quotas</span><span class="o">=</span><span class="n">quotas</span><span class="p">)],</span>
+    <span class="n">timestamp</span><span class="o">=</span><span class="n">TIMESTAMP_OFFSET</span> <span class="o">+</span> <span class="mi">9</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">assert</span> <span class="n">resp</span> <span class="o">==</span> <span class="p">[</span><span class="n">GrantedQuota</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="n">granted</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">reached_quotas</span><span class="o">=</span><span class="n">quotas</span><span class="p">)]</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter.check_and_use_quotas">
+<span class="sig-name descname"><span class="pre">check_and_use_quotas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">requests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter.check_and_use_quotas" title="Permalink to this definition"></a></dt>
+<dd><p>Check the quota requests in Redis and consume the quota in one go. See
+<cite>check_within_quotas</cite> for parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<a class="reference internal" href="#sentry_redis_tools.sliding_windows_rate_limiter.GrantedQuota" title="sentry_redis_tools.sliding_windows_rate_limiter.GrantedQuota"><code class="xref py py-class docutils literal notranslate"><span class="pre">GrantedQuota</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter.check_within_quotas">
+<span class="sig-name descname"><span class="pre">check_within_quotas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">requests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter.check_within_quotas" title="Permalink to this definition"></a></dt>
+<dd><p>Check whether the given requests are within quota, but do not actually consume quota.</p>
+<p>Consuming the quota is done via <a class="reference internal" href="#sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter.use_quotas" title="sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter.use_quotas"><code class="xref py py-meth docutils literal notranslate"><span class="pre">use_quotas()</span></code></a>, and should be
+done after the protected resource has actually been consumed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<a class="reference internal" href="#sentry_redis_tools.sliding_windows_rate_limiter.GrantedQuota" title="sentry_redis_tools.sliding_windows_rate_limiter.GrantedQuota"><code class="xref py py-class docutils literal notranslate"><span class="pre">GrantedQuota</span></code></a>]]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter.use_quotas">
+<span class="sig-name descname"><span class="pre">use_quotas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">requests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grants</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter.use_quotas" title="Permalink to this definition"></a></dt>
+<dd><p>Actually use up quotas after checking them using
+<a class="reference internal" href="#sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter.check_within_quotas" title="sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter.check_within_quotas"><code class="xref py py-meth docutils literal notranslate"><span class="pre">check_within_quotas()</span></code></a> and consuming the underlying resource.</p>
+<p>If you don’t care for this two-step dance, use <a class="reference internal" href="#sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter.check_and_use_quotas" title="sentry_redis_tools.sliding_windows_rate_limiter.RedisSlidingWindowRateLimiter.check_and_use_quotas"><code class="xref py py-meth docutils literal notranslate"><span class="pre">check_and_use_quotas()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sentry_redis_tools.sliding_windows_rate_limiter.RequestedQuota">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sentry_redis_tools.sliding_windows_rate_limiter.</span></span><span class="sig-name descname"><span class="pre">RequestedQuota</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">requested</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quotas</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sentry_redis_tools.sliding_windows_rate_limiter.RequestedQuota" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="failover_redis.html" class="btn btn-neutral float-left" title="FailoverRedis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cardinality_limiter.html" class="btn btn-neutral float-right" title="Cardinality Limiter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Sentry.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
