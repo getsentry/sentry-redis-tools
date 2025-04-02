@@ -1,5 +1,9 @@
 from typing import NoReturn
-from redis.cluster import RedisCluster
+
+try:
+    from redis import RedisCluster
+except ImportError:
+    from rediscluster import RedisCluster
 
 try:
     from rb import Cluster as BlasterClient
