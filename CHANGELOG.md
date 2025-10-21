@@ -1,5 +1,11 @@
 # Changelog and versioning
 
+## 0.5.1
+
+### Various fixes & improvements
+
+- fix: add context manager to unsafe redis connection (#26) by @kylemumma
+
 ## 0.5.0
 
 ### Various fixes & improvements
