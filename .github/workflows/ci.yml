@@ -33,10 +33,9 @@ jobs:
       - uses: actions/setup-python@v5
 
       - name: Install redis-cli
-        run: sudo apt-get install redis-tools
-      - run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
+        run: sudo apt-get update
+      - run: sudo apt-get install redis-tools
+      - run: sudo apt-get install -y docker-compose
       - run: make develop
       - run: make redis-cluster
       - run: pip install redis==${{ matrix.redis-py }}
