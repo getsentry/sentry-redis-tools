@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v2
       - uses: actions/setup-python@v5
 
       - run: make develop
@@ -29,7 +29,7 @@ jobs:
       matrix:
         redis-py: [3.*, 4.*]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v2
       - uses: actions/setup-python@v5
 
       - name: Install redis-cli
