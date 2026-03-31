@@ -1,7 +1,7 @@
 from typing import Union
 import pytest
 
-from sentry_redis_tools.clients import RedisCluster, StrictRedis
+from sentry_redis_tools.clients import RedisCluster, SentinelCluster, StrictRedis
 from sentry_redis_tools.sliding_windows_rate_limiter import (
     GrantedQuota,
     Quota,
@@ -10,9 +10,9 @@ from sentry_redis_tools.sliding_windows_rate_limiter import (
 )
 
 
-@pytest.fixture(params=["single", "cluster"])
+@pytest.fixture(params=["single", "cluster", "sentinel"])
 def limiter(
-    redis_cluster_client: Union[RedisCluster, StrictRedis]
+    redis_cluster_client: Union[RedisCluster, SentinelCluster, StrictRedis]
 ) -> RedisSlidingWindowRateLimiter:
     return RedisSlidingWindowRateLimiter(redis_cluster_client)
 
