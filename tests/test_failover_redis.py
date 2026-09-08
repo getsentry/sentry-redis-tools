@@ -55,14 +55,22 @@ def test_max_backoff(time_sleep: mock.Mock, execute_command: mock.Mock) -> None:
     assert all(a[0][0] <= 1.0 for a in time_sleep.call_args_list)
 
 
-@mock.patch("redis.client.Pipeline.execute")
+@mock.patch("redis.client.Pipeline._execute_transaction")
 @mock.patch("time.sleep")
-def test_pipelines(time_sleep: mock.Mock, execute_command: mock.Mock) -> None:
-    client = FailoverRedis(_backoff_max=1.0, _backoff_min=0.5)
-    assert client._retries == 10
-    execute_command.side_effect = ConnectionError()
+def test_pipeline_execute_not_retried_and_raises(
+    time_sleep: mock.Mock, execute_transaction: mock.Mock
+) -> None:
+    client = FailoverRedis(_retries=5)
+    execute_transaction.side_effect = ConnectionError()
+    pipe = client.pipeline()
+    pipe.get("key")
     with pytest.raises(ConnectionError):
-        pipe = client.pipeline()
-        pipe.get("key")
         pipe.execute()
-    assert all(a[0][0] <= 1.0 for a in time_sleep.call_args_list)
+    assert time_sleep.call_count == 0
+
+
+@mock.patch("time.sleep")
+def test_pipeline_empty_execute_returns_empty(time_sleep: mock.Mock) -> None:
+    client = FailoverRedis(_retries=5)
+    assert client.pipeline().execute() == []
+    assert time_sleep.call_count == 0
