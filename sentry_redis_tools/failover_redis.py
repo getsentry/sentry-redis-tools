@@ -132,7 +132,9 @@ class FailoverRedis(StrictRedis):  # type: ignore
     execute_command = _sentry_wrap_with_retry(lambda: StrictRedis.execute_command)
 
     def pipeline(self, *args: Any, **kwargs: Any) -> Any:
-        rv = StrictRedis.pipeline(self, *args, **kwargs)
-        old_execute = rv.execute
-        rv.execute = _sentry_wrap_with_retry(lambda: old_execute, client_self=self)
-        return rv
+        """
+        Returns a standard redis-py Pipeline. execute() is not retried: the
+        underlying Pipeline unconditionally clears its command list after
+        running, so a retry would silently execute nothing.
+        """
+        return StrictRedis.pipeline(self, *args, **kwargs)
