@@ -1,5 +1,15 @@
 # Changelog and versioning
 
+## 0.5.2
+
+### Bug Fixes 🐛
+
+- Disable FailoverRedis pipeline retries by @kcons in [#29](https://github.com/getsentry/sentry-redis-tools/pull/29)
+
+### Internal Changes 🔧
+
+- Pin GitHub Actions to full-length commit SHAs by @joshuarli in [#28](https://github.com/getsentry/sentry-redis-tools/pull/28)
+
 ## 0.5.1
 
 ### Various fixes & improvements
