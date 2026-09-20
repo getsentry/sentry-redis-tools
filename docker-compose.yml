@@ -9,6 +9,19 @@ services:
       IP: '0.0.0.0'
       INITIAL_PORT: 16379
 
+  redis-sentinel:
+    image: grokzen/redis-cluster:7.0.10
+    ports:
+      - '21379:21379'
+      - '23379:23379'
+      - '23385-23386:23385-23386'
+    environment:
+      IP: '0.0.0.0'
+      INITIAL_PORT: 23379
+      SENTINEL: 'true'
+      STANDALONE: 'true'
+      LC_ALL: C  # sentinel is sensitive to missing locales
+
   single-redis:
     image: redis
     ports:
