@@ -9,6 +9,7 @@ setup(
     url="https://github.com/getsentry/sentry-redis-tools",
     description="Common utilities related to how Sentry uses Redis",
     zip_safe=False,
+    python_requires=">=3.12",
     install_requires=['redis>=3.0'],
     extras_require={
      "cluster": ["redis-py-cluster>=2.1.0"],

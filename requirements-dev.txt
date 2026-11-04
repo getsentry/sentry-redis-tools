@@ -1,7 +1,9 @@
-black==22.6.0
-flake8==5.0.4
-mypy==0.971
+black==26.10.1
+flake8==7.5.0
+mypy==2.4.1
 pytest>=7.2.0
 sphinx-autodoc-typehints[type-comment]>=1.19.3
 sphinx-rtd-theme
 rb>=1.9.0
+# redis-py 3.x imports distutils, which Python 3.12 removed; setuptools provides it.
+setuptools

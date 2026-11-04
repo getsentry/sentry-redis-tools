@@ -406,8 +406,7 @@ class RedisBackend(ABC):
     @abstractmethod
     def run_check_within_quotas(
         self, unit_keys_to_get: Sequence[str], set_keys_to_count: Sequence[str]
-    ) -> Tuple[Mapping[str, int], Mapping[str, int]]:
-        ...
+    ) -> Tuple[Mapping[str, int], Mapping[str, int]]: ...
 
     @abstractmethod
     def run_use_quotas(
@@ -415,8 +414,7 @@ class RedisBackend(ABC):
         unit_keys_to_set: Mapping[str, int],
         set_keys_to_add: Mapping[str, Collection[int]],
         set_keys_ttl: Mapping[str, int],
-    ) -> None:
-        ...
+    ) -> None: ...
 
 
 class RedisClusterBackend(RedisBackend):

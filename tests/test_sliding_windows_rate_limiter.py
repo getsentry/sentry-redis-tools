@@ -12,7 +12,7 @@ from sentry_redis_tools.sliding_windows_rate_limiter import (
 
 @pytest.fixture(params=["single", "cluster"])
 def limiter(
-    redis_cluster_client: Union[RedisCluster, StrictRedis]
+    redis_cluster_client: Union[RedisCluster, StrictRedis],
 ) -> RedisSlidingWindowRateLimiter:
     return RedisSlidingWindowRateLimiter(redis_cluster_client)
 

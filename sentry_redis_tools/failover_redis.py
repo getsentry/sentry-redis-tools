@@ -16,7 +16,6 @@ def _sentry_wrap_with_retry(
     get_wrapped_fn: Callable[[], Any], client_self: Optional[FailoverRedis] = None
 ) -> Any:
     def wrapper(*args: Any, **kwargs: Any) -> Any:
-        nonlocal client_self
         slf = client_self
         if slf is None:
             slf = args[0]
