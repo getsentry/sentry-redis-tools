@@ -6,6 +6,5 @@ changelogPolicy: auto
 targets:
   - name: github
   - name: pypi
-    includeNames: /^.*\.tar\.gz$/
   - name: sentry-pypi
     internalPypiRepo: getsentry/pypi
