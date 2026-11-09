@@ -1,5 +1,17 @@
 # Changelog and versioning
 
+## 0.5.3
+
+### Bug Fixes 🐛
+
+- Restore wheel publishing by @sentry-junior in [#31](https://github.com/getsentry/sentry-redis-tools/pull/31)
+- Publish repaired sdist only Co-Authored-By: Kyle Consalus <kyle.consalus@sentry.io> by @sentry-junior in [89adac60](https://github.com/getsentry/sentry-redis-tools/commit/89adac60c0a1d1f852a861a1f80eac60184bd3be)
+- Build normalized Python distributions Co-Authored-By: Kyle Consalus <kyle.consalus@sentry.io> by @sentry-junior in [a883ca2e](https://github.com/getsentry/sentry-redis-tools/commit/a883ca2e9958c03570b68bced3c04e5585e2c49b)
+
+### Internal Changes 🔧
+
+- Test against a Valkey cluster on Python 3.12 by @Starrao123 in [#32](https://github.com/getsentry/sentry-redis-tools/pull/32)
+
 ## 0.5.2
 
 ### Bug Fixes 🐛
